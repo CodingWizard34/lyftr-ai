@@ -81,6 +81,7 @@ class LLMService:
                 api_key=key,
                 timeout=DEFAULT_TIMEOUT,
                 caching=CACHE_ENABLED,
+                num_retries=2,
             )
         except Exception as exc:
             import traceback
