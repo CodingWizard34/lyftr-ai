@@ -1,6 +1,7 @@
 import time
 from typing import List, Dict, Any, Optional, Tuple
 
+import httpx
 import litellm
 from litellm import completion
 
@@ -13,6 +14,13 @@ from app.config import (
     LITELLM_CACHE_TTL,
     DEFAULT_TIMEOUT,
 )
+
+# Patch LiteLLM's internal default HTTP client timeout (which defaults to only 5.0 seconds)
+try:
+    import litellm.llms.custom_httpx.http_handler as _litellm_http_handler
+    _litellm_http_handler._DEFAULT_TIMEOUT = httpx.Timeout(float(DEFAULT_TIMEOUT))
+except Exception:
+    pass
 from app.cache_service import configure_cache
 from app.failover_service import (
     parse_simulation_header,
