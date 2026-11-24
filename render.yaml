@@ -19,6 +19,6 @@ services:
       - key: ENABLE_FAILURE_SIMULATION
         value: "false"
       - key: DATABASE_URL
-        value: sqlite:////data/app.db
+        value: sqlite:///./app.db
       - key: ALLOWED_ORIGINS
         sync: false

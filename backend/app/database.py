@@ -6,9 +6,34 @@ from contextlib import contextmanager
 
 from app.config import DATABASE_URL
 
+
+def _resolve_database_url(url: str) -> str:
+    """Ensure directory exists for SQLite database, or fallback if unprivileged."""
+    if url.startswith("sqlite:////"):
+        db_path = url.replace("sqlite:////", "/")
+        parent = os.path.dirname(db_path)
+        if parent:
+            try:
+                os.makedirs(parent, exist_ok=True)
+            except (PermissionError, OSError):
+                # Unprivileged container without persistent disk mount at /data
+                return "sqlite:///./app.db"
+    elif url.startswith("sqlite:///"):
+        db_path = url.replace("sqlite:///", "")
+        parent = os.path.dirname(db_path)
+        if parent:
+            try:
+                os.makedirs(parent, exist_ok=True)
+            except (PermissionError, OSError):
+                return "sqlite:///./app.db"
+    return url
+
+
+ACTUAL_DATABASE_URL = _resolve_database_url(DATABASE_URL)
+
 engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {},
+    ACTUAL_DATABASE_URL,
+    connect_args={"check_same_thread": False} if ACTUAL_DATABASE_URL.startswith("sqlite") else {},
     pool_pre_ping=True,
 )
 
@@ -33,16 +58,7 @@ class Message(Base):
 
 
 def create_db_and_tables():
-    if DATABASE_URL.startswith("sqlite:////"):
-        db_path = DATABASE_URL.replace("sqlite:////", "/")
-        parent = os.path.dirname(db_path)
-        if parent:
-            os.makedirs(parent, exist_ok=True)
-    elif DATABASE_URL.startswith("sqlite:///"):
-        db_path = DATABASE_URL.replace("sqlite:///", "")
-        parent = os.path.dirname(db_path)
-        if parent:
-            os.makedirs(parent, exist_ok=True)
+    _resolve_database_url(ACTUAL_DATABASE_URL)
     Base.metadata.create_all(bind=engine)
 
 
