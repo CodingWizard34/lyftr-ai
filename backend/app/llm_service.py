@@ -188,7 +188,7 @@ class LLMService:
                 model=target_model,
                 messages=messages,
                 api_key=key,
-                timeout=25,
+                timeout=8,
                 caching=CACHE_ENABLED,
                 num_retries=0,
             )
@@ -271,9 +271,9 @@ class LLMService:
                 fallback_attempts += 1
                 last_status = status_code or 500
 
-                # If upstream Google API returns 503 (model experiencing high demand),
+                # If upstream Google API returns 503 (high demand) or 429 (rate-limit/free quota),
                 # do not burn remaining keys on this overloaded model; advance immediately to fallback model
-                if status_code == 503 and not simulation and cur_model != "gemini/gemini-3.5-flash-lite":
+                if status_code in (503, 429, 404) and not simulation and cur_model != "gemini/gemini-3.5-flash-lite":
                     model_overloaded = True
                     break
 
