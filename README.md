@@ -221,10 +221,10 @@ All 19 test cases run against isolated, in-memory/temporary SQLite fixtures.
    - **Mount Path:** `/data`
    - **Size:** `1 GB`
 5. Configure Environment Variables:
-   - `LLM_API_KEYS`: your real API keys (`sk-...,sk-...`)
-   - `DEFAULT_MODEL`: `gemini/gemini-2.0-flash`
-   - `DATABASE_URL`: `sqlite:////data/app.db`
-   - `ALLOWED_ORIGINS`: your Vercel frontend URL (e.g., `https://lyftr-ai.vercel.app`)
+   - `LLM_API_KEYS`: your real API keys (`sk-...,sk-...` or Gemini keys)
+   - `DEFAULT_MODEL`: `gemini/gemini-3.5-flash`
+   - `DATABASE_URL`: `sqlite:///./app.db`
+   - `ALLOWED_ORIGINS`: `*` (or your Vercel frontend URL)
    - `CACHE_ENABLED`: `true`
    - `ENABLE_FAILURE_SIMULATION`: `false`
 
@@ -238,7 +238,7 @@ All 19 test cases run against isolated, in-memory/temporary SQLite fixtures.
    - **Build Command:** `npm run build`
    - **Output Directory:** `dist`
 3. Environment Variables:
-   - `VITE_API_URL`: Your deployed Render backend URL (e.g. `https://lyftr-ai-backend.onrender.com`)
+   - `VITE_API_URL`: Your deployed Render backend URL (`https://lyftr-ai-backend-ae6a.onrender.com`)
 4. Deploy!
 
 ---
@@ -247,4 +247,4 @@ All 19 test cases run against isolated, in-memory/temporary SQLite fixtures.
 
 - **GitHub Repository:** [https://github.com/CodingWizard34/lyftr-ai](https://github.com/CodingWizard34/lyftr-ai)
 - **Production Backend:** [https://lyftr-ai-backend-ae6a.onrender.com](https://lyftr-ai-backend-ae6a.onrender.com)
-- **Production Frontend:** *(Deploying on Vercel)*
+- **Production Frontend:** [https://lyftr-ai-mocha.vercel.app](https://lyftr-ai-mocha.vercel.app)
