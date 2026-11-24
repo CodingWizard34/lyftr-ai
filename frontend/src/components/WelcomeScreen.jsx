@@ -18,6 +18,13 @@ const cards = [
   },
 ];
 
+const prompts = [
+  "Explain how multi-key failover works",
+  "Write a summary of distributed caching",
+  "Help me debug a FastAPI backend service",
+  "Brainstorm ideas for an AI startup",
+];
+
 export default function WelcomeScreen({ onPromptSelect }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
