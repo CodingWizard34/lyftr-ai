@@ -135,8 +135,6 @@ class LLMService:
         if not simulation:
             for fallback_m in [
                 "gemini/gemini-3.5-flash-lite",
-                "gemini/gemini-flash-lite-latest",
-                "gemini/gemini-3.8-flash",
             ]:
                 if fallback_m not in models_to_try:
                     models_to_try.append(fallback_m)
@@ -158,6 +156,21 @@ class LLMService:
                     else:
                         metadata["fallback_attempts"] = fallback_attempts
                     return reply, metadata
+
+                # If temporary upstream 503 spike, retry once after a short 0.5s pause
+                if status_code == 503 and not simulation:
+                    time.sleep(0.5)
+                    retry_success, retry_reply, retry_meta, retry_status = self._call_single_key(
+                        key, key_id, messages, simulation, model=cur_model
+                    )
+                    if retry_success:
+                        if retry_meta.get("resolution_source") == "LLM_CACHE":
+                            retry_meta["fallback_attempts"] = 0
+                            retry_meta["key_id"] = None
+                        else:
+                            retry_meta["fallback_attempts"] = fallback_attempts
+                        return retry_reply, retry_meta
+                    status_code = retry_status
 
                 fallback_attempts += 1
                 last_status = status_code or 500

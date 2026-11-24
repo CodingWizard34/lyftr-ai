@@ -75,7 +75,16 @@ def chat(
             .all()
         )
 
-    history = [{"role": r.role, "content": r.content} for r in rows]
+    MAX_HISTORY_MESSAGES = 10
+    MAX_ASSISTANT_HISTORY_CHARS = 1200
+
+    recent_rows = rows[-MAX_HISTORY_MESSAGES:] if len(rows) > MAX_HISTORY_MESSAGES else rows
+    history = []
+    for r in recent_rows:
+        content = r.content
+        if r.role == "assistant" and len(content) > MAX_ASSISTANT_HISTORY_CHARS:
+            content = content[:MAX_ASSISTANT_HISTORY_CHARS] + "..."
+        history.append({"role": r.role, "content": content})
 
     try:
         reply, metadata = llm_service.infer(

@@ -52,8 +52,8 @@ export default function App() {
 
   const scrollRef = useRef(null);
 
-  const checkBackendHealth = useCallback(() => {
-    setConnectionStatus("checking");
+  const checkBackendHealth = useCallback((isInitial = false) => {
+    if (isInitial) setConnectionStatus("checking");
     health()
       .then((res) => {
         setConnectionStatus("connected");
@@ -71,10 +71,10 @@ export default function App() {
     setMessages([]);
     setWelcomeScreen(true);
     setError(null);
-    checkBackendHealth();
+    checkBackendHealth(true);
 
     const timer = setInterval(() => {
-      checkBackendHealth();
+      checkBackendHealth(false);
     }, 15000);
     return () => clearInterval(timer);
   }, [checkBackendHealth]);
@@ -232,7 +232,6 @@ export default function App() {
         },
       ]);
     } catch (err) {
-      setMessages((prev) => prev.filter((_, i) => i !== prev.length - 1));
       setError(extractError(err));
     } finally {
       setLoading(false);
