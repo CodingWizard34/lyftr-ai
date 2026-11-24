@@ -79,7 +79,7 @@ class LLMService:
                 model=target_model,
                 messages=messages,
                 api_key=key,
-                timeout=15,
+                timeout=25,
                 caching=CACHE_ENABLED,
                 num_retries=0,
             )

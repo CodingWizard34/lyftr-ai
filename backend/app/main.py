@@ -75,8 +75,9 @@ def chat(
             .all()
         )
 
-    MAX_HISTORY_MESSAGES = 10
-    MAX_ASSISTANT_HISTORY_CHARS = 1200
+    # Keep last 6 conversation turns and cap assistant history entries to 400 chars so upstream Google API never triggers free-tier 503 load-shedding
+    MAX_HISTORY_MESSAGES = 6
+    MAX_ASSISTANT_HISTORY_CHARS = 400
 
     recent_rows = rows[-MAX_HISTORY_MESSAGES:] if len(rows) > MAX_HISTORY_MESSAGES else rows
     history = []
