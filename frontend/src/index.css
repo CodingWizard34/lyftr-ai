@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --main: #080609;
+    --sidebar: #050505;
+    --workspace: #120A16;
+    --surface: #19131D;
+    --card: #100D12;
+    --purple: #A855F7;
+    --accent: #C084FC;
+    --border: rgba(255, 255, 255, 0.09);
+  }
+
+  body {
+    @apply bg-main text-text-primary;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .sidebar {
+    @apply bg-sidebar border-r border-border h-[100vh] fixed left-0 top-0 z-20 flex flex-col;
+    width: 272px;
+    transition: width 0.3s ease;
+  }
+  .sidebar.collapsed {
+    width: 72px;
+  }
+  .workspace {
+    @apply bg-workspace min-h-[100vh] transition-all duration-300;
+    margin-left: 272px;
+  }
+  .workspace.collapsed {
+    margin-left: 72px;
+  }
+  .card {
+    @apply bg-card border border-border rounded-xl p-6;
+  }
+  .chip {
+    @apply px-4 py-2 rounded-full border border-border bg-surface text-text-secondary text-sm hover:bg-surface/80 hover:text-text-primary cursor-pointer transition-colors;
+  }
+}

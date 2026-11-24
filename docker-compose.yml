@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: lyftr-ai-backend
+    restart: unless-stopped
+    environment:
+      - LLM_API_KEYS=${LLM_API_KEYS}
+      - DEFAULT_MODEL=${DEFAULT_MODEL}
+      - CACHE_ENABLED=${CACHE_ENABLED}
+      - ENABLE_FAILURE_SIMULATION=${ENABLE_FAILURE_SIMULATION}
+      - DATABASE_URL=${DATABASE_URL}
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN}
+    ports:
+      - "8000:8000"
+    volumes:
+      - sqlite_data:/data
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: lyftr-ai-frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
+    ports:
+      - "3000:3000"
+
+volumes:
+  sqlite_data:
