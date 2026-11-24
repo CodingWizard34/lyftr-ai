@@ -225,6 +225,7 @@ class TestChat:
     def test_unknown_session_returns_404(self, client: TestClient):
         resp = client.get("/sessions/does-not-exist/messages")
         assert resp.status_code == 404, resp.text
+        assert resp.json()["detail"] == "session not found"
 
     def test_failure_simulation_affects_only_one_request(self, client: TestClient, mock_llm):
         _, _, add_reply, _ = mock_llm

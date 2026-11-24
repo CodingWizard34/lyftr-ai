@@ -9,9 +9,6 @@ export default function ChatWindow({ messages, isLoading }) {
           {messages.map((m, i) => (
             <div key={i} className="animate-fade-in flex flex-col">
               <MessageBubble role={m.role} content={m.content} metadata={m.metadata} />
-              {m.role === "assistant" && m.metadata && (
-                <ResponseMetadata metadata={m.metadata} />
-              )}
             </div>
           ))}
 

@@ -127,7 +127,7 @@ def get_messages(session_id: str):
             .first()
         )
         if not exists:
-            raise HTTPException(status_code=404, detail="Session not found")
+            raise HTTPException(status_code=404, detail="session not found")
 
         rows = (
             db.query(MessageModel)

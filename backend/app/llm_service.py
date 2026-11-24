@@ -140,7 +140,11 @@ class LLMService:
                 key, key_id, messages, simulation, model=model
             )
             if success:
-                metadata["fallback_attempts"] = fallback_attempts
+                if metadata.get("resolution_source") == "LLM_CACHE":
+                    metadata["fallback_attempts"] = 0
+                    metadata["key_id"] = None
+                else:
+                    metadata["fallback_attempts"] = fallback_attempts
                 return reply, metadata
 
             fallback_attempts += 1

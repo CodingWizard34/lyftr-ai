@@ -77,17 +77,16 @@ export default function MessageComposer({
         </div>
       </div>
 
-      {showSystemPrompt && (
-        <div className="mb-3">
-          <textarea
-            className="w-full bg-card/80 border border-purple/30 rounded-lg px-3 py-2 text-text-primary text-xs focus:outline-none focus:border-purple/60 transition-colors resize-none"
-            placeholder="System prompt (e.g. 'You are an expert full-stack developer answering concisely')..."
-            value={systemPrompt ?? ""}
-            onChange={(e) => onSystemPromptChange(e.target.value)}
-            rows={2}
-          />
-        </div>
-      )}
+      <div className={showSystemPrompt ? "mb-3" : "hidden"}>
+        <textarea
+          data-testid="system-prompt-input"
+          className="w-full bg-card/80 border border-purple/30 rounded-lg px-3 py-2 text-text-primary text-xs focus:outline-none focus:border-purple/60 transition-colors resize-none"
+          placeholder="System prompt (e.g. 'You are an expert full-stack developer answering concisely')..."
+          value={systemPrompt ?? ""}
+          onChange={(e) => onSystemPromptChange(e.target.value)}
+          rows={2}
+        />
+      </div>
 
       <div className="flex gap-3">
         <div className="flex-1 relative">
