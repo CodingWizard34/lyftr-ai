@@ -28,10 +28,11 @@ export default function App() {
   const [systemPrompt, setSystemPrompt] = useState(undefined);
   const [connectionStatus, setConnectionStatus] = useState("checking");
   const [healthData, setHealthData] = useState(null);
-  const [model, setModel] = useState("gemini/gemini-3.5-flash-lite");
+  const [model, setModel] = useState("gemini/gemini-3.5-flash");
   const [collapsed, setCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [welcomeScreen, setWelcomeScreen] = useState(true);
+  const [attachedFile, setAttachedFile] = useState(null);
 
   // Saved sessions for History & Archive
   const [savedSessions, setSavedSessions] = useState(() => {
@@ -52,8 +53,8 @@ export default function App() {
 
   const scrollRef = useRef(null);
 
-  const checkBackendHealth = useCallback((isInitial = false) => {
-    if (isInitial) setConnectionStatus("checking");
+  const checkBackendHealth = useCallback(() => {
+    setConnectionStatus("checking");
     health()
       .then((res) => {
         setConnectionStatus("connected");
@@ -71,10 +72,10 @@ export default function App() {
     setMessages([]);
     setWelcomeScreen(true);
     setError(null);
-    checkBackendHealth(true);
+    checkBackendHealth();
 
     const timer = setInterval(() => {
-      checkBackendHealth(false);
+      checkBackendHealth();
     }, 15000);
     return () => clearInterval(timer);
   }, [checkBackendHealth]);
@@ -128,6 +129,7 @@ export default function App() {
     setWelcomeScreen(true);
     setError(null);
     setInputValue("");
+    setAttachedFile(null);
     setHistoryOpen(false);
     setArchiveOpen(false);
   }, []);
@@ -147,6 +149,7 @@ export default function App() {
     setMessages(targetSession.messages || []);
     setWelcomeScreen(false);
     setError(null);
+    setAttachedFile(null);
     setHistoryOpen(false);
     setArchiveOpen(false);
   }, []);
@@ -232,6 +235,7 @@ export default function App() {
         },
       ]);
     } catch (err) {
+      setMessages((prev) => prev.filter((_, i) => i !== prev.length - 1));
       setError(extractError(err));
     } finally {
       setLoading(false);
@@ -306,6 +310,8 @@ export default function App() {
                 systemPrompt={systemPrompt}
                 onSystemPromptChange={setSystemPrompt}
                 isLoading={loading}
+                attachedFile={attachedFile}
+                onAttachedFileChange={setAttachedFile}
               />
             </div>
           </div>

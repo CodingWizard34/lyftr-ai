@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Send, Paperclip, SlidersHorizontal, Loader2, X, FileText, Check } from "lucide-react";
+import { Send, Paperclip, SlidersHorizontal, Loader2, X, FileText, Image as ImageIcon, RefreshCw } from "lucide-react";
 
 const SYSTEM_PROMPT_PRESETS = [
   { label: "Helpful Assistant", prompt: "You are Lyftr AI, a helpful, precise, and friendly AI assistant." },
@@ -16,10 +16,11 @@ export default function MessageComposer({
   systemPrompt,
   onSystemPromptChange,
   isLoading,
+  attachedFile,
+  onAttachedFileChange,
 }) {
   const fileInputRef = useRef(null);
   const [showSystemPrompt, setShowSystemPrompt] = useState(Boolean(systemPrompt));
-  const [attachedFile, setAttachedFile] = useState(null);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -30,35 +31,69 @@ export default function MessageComposer({
 
   const handleAttachClick = () => {
     if (fileInputRef.current) {
+      // Clear value first so selecting the same or updated file always fires onChange
+      fileInputRef.current.value = "";
       fileInputRef.current.click();
     }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
+    // Reset input immediately so next click can pick a fresh file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result;
-      if (typeof content === "string") {
-        setAttachedFile({
+    const isImage = file.type.startsWith("image/");
+    if (isImage) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        onAttachedFileChange({
           name: file.name,
           size: file.size,
-          content: content,
+          type: file.type,
+          isImage: true,
+          previewUrl: event.target?.result,
+          lastModified: file.lastModified,
         });
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const textContent = typeof event.target?.result === "string" ? event.target.result : "";
+        onAttachedFileChange({
+          name: file.name,
+          size: file.size,
+          type: file.type || "text/plain",
+          isImage: false,
+          content: textContent,
+          lastModified: file.lastModified,
+        });
+      };
+      reader.readAsText(file);
+    }
   };
 
   const triggerSend = () => {
     if (disabled || isLoading) return;
 
     if (attachedFile) {
-      const snippet = `[Attached File: ${attachedFile.name}]\n\`\`\`\n${attachedFile.content.slice(0, 3000)}\n\`\`\`\n\n${value.trim() || "Please review and explain this attached file."}`;
-      setAttachedFile(null);
+      let snippet = "";
+      if (attachedFile.isImage) {
+        snippet = `[Attached Image: ${attachedFile.name} (${(attachedFile.size / 1024).toFixed(1)} KB)]\n\n${value.trim() || "Please describe or analyze this image."}`;
+      } else if (attachedFile.content) {
+        // Truncate file content so total prompt stays comfortably under 4000 characters
+        const maxContentLen = Math.max(500, 3200 - value.trim().length);
+        const snippetText = attachedFile.content.slice(0, maxContentLen);
+        const truncatedNotice = attachedFile.content.length > maxContentLen ? "\n... [content truncated to fit character limit]" : "";
+        snippet = `[Attached File: ${attachedFile.name}]\n\`\`\`\n${snippetText}${truncatedNotice}\n\`\`\`\n\n${value.trim() || "Please review and explain this attached file."}`;
+      } else {
+        snippet = `[Attached File: ${attachedFile.name} (${(attachedFile.size / 1024).toFixed(1)} KB)]\n\n${value.trim() || "Please assist with this file."}`;
+      }
+
+      onAttachedFileChange(null);
       onSend(snippet);
     } else {
       if (!value.trim()) return;
@@ -74,26 +109,27 @@ export default function MessageComposer({
           <button
             type="button"
             onClick={handleAttachClick}
-            className={`flex items-center gap-1.5 text-xs transition-colors cursor-pointer py-1 px-2 rounded-md hover:bg-surface ${
-              attachedFile ? "text-purple font-medium bg-purple/10" : "hover:text-text-primary"
+            className={`flex items-center gap-1.5 text-xs transition-colors cursor-pointer py-1 px-2.5 rounded-lg hover:bg-surface border border-transparent ${
+              attachedFile ? "text-purple font-medium bg-purple/15 border-purple/30" : "hover:text-text-primary"
             }`}
-            title="Attach a code, text, CSV, or markdown file"
+            title="Attach any file (code, documents, images, text, csv, etc.)"
           >
             <Paperclip className="w-3.5 h-3.5 text-purple" />
             <span>Attach File</span>
           </button>
+          
+          {/* File input accepting all files without restricting extensions */}
           <input
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept=".txt,.md,.js,.jsx,.ts,.tsx,.py,.json,.html,.css,.csv,.sql,.sh,.yaml,.yml"
             className="hidden"
           />
 
           <button
             type="button"
             onClick={() => setShowSystemPrompt(!showSystemPrompt)}
-            className={`flex items-center gap-1.5 text-xs transition-colors cursor-pointer py-1 px-2 rounded-md hover:bg-surface ${
+            className={`flex items-center gap-1.5 text-xs transition-colors cursor-pointer py-1 px-2.5 rounded-lg hover:bg-surface ${
               showSystemPrompt || systemPrompt ? "text-purple font-medium bg-purple/10" : "hover:text-text-primary"
             }`}
             title="Toggle custom system prompt"
@@ -106,18 +142,45 @@ export default function MessageComposer({
           </button>
         </div>
 
+        {/* Current Attached File Indicator */}
         {attachedFile && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple/20 border border-purple/30 text-[11px] text-text-primary animate-fade-in">
-            <FileText className="w-3 h-3 text-purple" />
-            <span className="font-mono max-w-[150px] truncate">{attachedFile.name}</span>
-            <span className="text-text-secondary text-[10px]">({(attachedFile.size / 1024).toFixed(1)} KB)</span>
-            <button
-              onClick={() => setAttachedFile(null)}
-              className="p-0.5 hover:text-red-400 text-text-secondary transition-colors"
-              title="Remove file"
-            >
-              <X className="w-3 h-3" />
-            </button>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple/20 border border-purple/40 text-xs text-text-primary animate-fade-in shadow-sm">
+            {attachedFile.isImage && attachedFile.previewUrl ? (
+              <img
+                src={attachedFile.previewUrl}
+                alt="thumbnail"
+                className="w-5 h-5 rounded object-cover border border-purple/40 flex-shrink-0"
+              />
+            ) : (
+              <FileText className="w-3.5 h-3.5 text-purple flex-shrink-0" />
+            )}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-mono text-[11px] truncate max-w-[140px] text-text-primary font-medium">
+                {attachedFile.name}
+              </span>
+              <span className="text-text-secondary text-[10px]">
+                ({(attachedFile.size / 1024).toFixed(1)} KB)
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-1 ml-1 pl-1 border-l border-border/60">
+              <button
+                type="button"
+                onClick={handleAttachClick}
+                className="p-1 hover:text-purple text-text-secondary transition-colors"
+                title="Change to a different file"
+              >
+                <RefreshCw className="w-3 h-3" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onAttachedFileChange(null)}
+                className="p-1 hover:text-red-400 text-text-secondary transition-colors"
+                title="Remove attached file"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -169,7 +232,11 @@ export default function MessageComposer({
         <div className="flex-1 relative">
           <textarea
             className="w-full bg-card border border-border rounded-xl px-4 py-3 text-text-primary text-sm focus:outline-none focus:border-purple/50 transition-colors resize-none leading-relaxed"
-            placeholder={attachedFile ? "Add a question or instruction about the attached file..." : "Ask anything... (Shift+Enter for new line)"}
+            placeholder={
+              attachedFile
+                ? `Attached "${attachedFile.name}". Add a question or press Send...`
+                : "Ask anything... (Shift+Enter for new line)"
+            }
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
