@@ -92,6 +92,7 @@ export default function App() {
           session_id: sessionId,
           message: text,
           system_prompt: systemPrompt || undefined,
+          model: model,
         },
         headers
       );
