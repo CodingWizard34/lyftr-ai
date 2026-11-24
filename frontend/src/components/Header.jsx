@@ -25,9 +25,9 @@ export default function Header({
             onChange={(e) => onModelChange(e.target.value)}
             className="bg-card border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-purple/50 cursor-pointer"
           >
-            <option value="gemini/gemini-3.5-flash">Gemini 3.5 Flash (Recommended)</option>
-            <option value="gemini/gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (Fast Fallback)</option>
-            <option value="gemini/gemini-3.8-flash">Gemini 3.8 Flash (Latest)</option>
+            <option value="gemini/gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (Recommended - Fast & High Quota)</option>
+            <option value="gemini/gemini-3.5-flash">Gemini 3.5 Flash (Standard)</option>
+            <option value="gemini/gemini-3.8-flash">Gemini 3.8 Flash (Latest Preview)</option>
             <option value="gemini/gemini-pro-latest">Gemini Pro</option>
           </select>
           <button

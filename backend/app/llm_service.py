@@ -79,9 +79,9 @@ class LLMService:
                 model=target_model,
                 messages=messages,
                 api_key=key,
-                timeout=DEFAULT_TIMEOUT,
+                timeout=15,
                 caching=CACHE_ENABLED,
-                num_retries=2,
+                num_retries=0,
             )
         except Exception as exc:
             import traceback
@@ -132,8 +132,14 @@ class LLMService:
 
         chosen_model = model or self.default_model
         models_to_try = [chosen_model]
-        if not simulation and chosen_model != "gemini/gemini-3.5-flash-lite":
-            models_to_try.append("gemini/gemini-3.5-flash-lite")
+        if not simulation:
+            for fallback_m in [
+                "gemini/gemini-3.5-flash-lite",
+                "gemini/gemini-flash-lite-latest",
+                "gemini/gemini-3.8-flash",
+            ]:
+                if fallback_m not in models_to_try:
+                    models_to_try.append(fallback_m)
 
         for cur_model in models_to_try:
             for key, key_id in zip(self.keys, self.key_ids):

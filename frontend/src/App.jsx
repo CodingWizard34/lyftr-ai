@@ -28,7 +28,7 @@ export default function App() {
   const [systemPrompt, setSystemPrompt] = useState(undefined);
   const [connectionStatus, setConnectionStatus] = useState("checking");
   const [healthData, setHealthData] = useState(null);
-  const [model, setModel] = useState("gemini/gemini-3.5-flash");
+  const [model, setModel] = useState("gemini/gemini-3.5-flash-lite");
   const [collapsed, setCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [welcomeScreen, setWelcomeScreen] = useState(true);
