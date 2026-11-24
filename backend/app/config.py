@@ -5,7 +5,7 @@ load_dotenv()
 
 # LiteLLM / provider configuration
 LLM_API_KEYS = [k.strip().strip('"').strip("'") for k in os.getenv("LLM_API_KEYS", "").split(",") if k.strip()]
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gemini/gemini-2.0-flash")
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gemini/gemini-3.5-flash")
 
 # Map keys to stable key IDs
 def _key_id(key: str) -> str:

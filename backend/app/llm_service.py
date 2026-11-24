@@ -56,6 +56,7 @@ class LLMService:
         key_id: str,
         messages: List[Dict[str, str]],
         simulation: Dict[str, str],
+        model: Optional[str] = None,
     ) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]], Optional[int]]:
         """Attempt inference with a single key.
         Returns (success, reply, metadata, status_code_if_failed).
@@ -63,10 +64,11 @@ class LLMService:
         if is_key_simulated_failure(key_id, simulation):
             return False, None, None, simulated_status_code(key_id, simulation) or 500
 
+        target_model = model or self.default_model
         start = time.perf_counter()
         try:
             response = completion(
-                model=self.default_model,
+                model=target_model,
                 messages=messages,
                 api_key=key,
                 timeout=DEFAULT_TIMEOUT,
@@ -85,7 +87,7 @@ class LLMService:
 
         metadata: Dict[str, Any] = {
             "resolution_source": "LLM_CACHE" if cache_hit else "LIVE_INFERENCE",
-            "model": self.default_model,
+            "model": target_model,
             "latency_ms": max(latency_ms, 0),
             "input_tokens": _get_usage_field(usage, "prompt_tokens", "input_tokens"),
             "output_tokens": _get_usage_field(usage, "completion_tokens", "output_tokens"),
@@ -107,6 +109,7 @@ class LLMService:
         history: List[Dict[str, str]],
         user_message: str,
         simulate_header: Optional[str] = None,
+        model: Optional[str] = None,
     ) -> Tuple[str, Dict[str, Any]]:
         """Run inference with multi-key failover.
         Returns (reply, metadata).
@@ -125,7 +128,7 @@ class LLMService:
                 continue
 
             success, reply, metadata, status_code = self._call_single_key(
-                key, key_id, messages, simulation
+                key, key_id, messages, simulation, model=model
             )
             if success:
                 metadata["fallback_attempts"] = fallback_attempts

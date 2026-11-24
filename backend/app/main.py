@@ -83,6 +83,7 @@ def chat(
             history=history,
             user_message=request.message,
             simulate_header=x_simulate_failure,
+            model=request.model,
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail="all providers unavailable")

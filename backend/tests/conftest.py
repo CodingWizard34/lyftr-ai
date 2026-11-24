@@ -15,7 +15,7 @@ os.close(_fd)
 _db_path = _TEST_DB.replace("\\", "/")
 os.environ["DATABASE_URL"] = f"sqlite:///{_db_path}"
 os.environ["LLM_API_KEYS"] = "test-key-1,test-key-2"
-os.environ["DEFAULT_MODEL"] = "gemini/gemini-2.0-flash"
+os.environ["DEFAULT_MODEL"] = "gemini/gemini-3.5-flash"
 os.environ["CACHE_ENABLED"] = "true"
 os.environ["ENABLE_FAILURE_SIMULATION"] = "true"
 os.environ["FRONTEND_ORIGIN"] = "*"
@@ -67,7 +67,7 @@ def mock_llm():
     """Mock llm_service.infer to return canned (reply, metadata) tuples."""
     calls = []  # list of (system_prompt, history, user_message, simulate_header)
 
-    def _infer(system_prompt, history, user_message, simulate_header=None):
+    def _infer(system_prompt, history, user_message, simulate_header=None, model=None, **kwargs):
         calls.append((system_prompt, history, user_message, simulate_header))
         if not _infer.responses:
             raise RuntimeError("all providers unavailable")
@@ -79,7 +79,7 @@ def mock_llm():
     def add_reply(reply, metadata=None):
         default = {
             "resolution_source": "LIVE_INFERENCE",
-            "model": "gemini/gemini-2.0-flash",
+            "model": "gemini/gemini-3.5-flash",
             "latency_ms": 100,
             "input_tokens": 10,
             "output_tokens": 9,

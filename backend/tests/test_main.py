@@ -20,7 +20,7 @@ class TestChat:
             "Hello! How can I help?",
             {
                 "resolution_source": "LIVE_INFERENCE",
-                "model": "gemini/gemini-2.0-flash",
+                "model": "gemini/gemini-3.5-flash",
                 "latency_ms": 812,
                 "input_tokens": 42,
                 "output_tokens": 9,
@@ -39,7 +39,7 @@ class TestChat:
         assert body["reply"] == "Hello! How can I help?"
         md = body["metadata"]
         assert md["resolution_source"] == "LIVE_INFERENCE"
-        assert md["model"] == "gemini/gemini-2.0-flash"
+        assert md["model"] == "gemini/gemini-3.5-flash"
         assert md["key_id"] in ("key_1", "key_2")
         assert md["fallback_attempts"] == 0
         assert md["input_tokens"] == 42
