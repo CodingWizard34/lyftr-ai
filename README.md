@@ -245,6 +245,6 @@ All 19 test cases run against isolated, in-memory/temporary SQLite fixtures.
 
 ## Deployment Links
 
-- **GitHub Repository:** *(Configured upon push)*
+- **GitHub Repository:** [https://github.com/CodingWizard34/lyftr-ai](https://github.com/CodingWizard34/lyftr-ai)
 - **Production Backend:** *(Configured on Render)*
 - **Production Frontend:** *(Configured on Vercel)*
