@@ -4,19 +4,39 @@
 
 @layer base {
   :root {
-    --main: #080609;
-    --sidebar: #050505;
-    --workspace: #120A16;
-    --surface: #19131D;
-    --card: #100D12;
+    --main: #0d0f17;
+    --sidebar: #121420;
+    --workspace: #161926;
+    --surface: #1e2235;
+    --card: #181b2c;
     --purple: #A855F7;
     --accent: #C084FC;
-    --border: rgba(255, 255, 255, 0.09);
+    --border: rgba(255, 255, 255, 0.12);
   }
 
   body {
     @apply bg-main text-text-primary;
     font-family: "Inter", system-ui, sans-serif;
+  }
+
+  /* Sleek custom scrollbars across all browsers */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.25);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(168, 85, 247, 0.5);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(168, 85, 247, 0.25) transparent;
   }
 }
 

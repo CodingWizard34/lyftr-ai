@@ -10,11 +10,12 @@ export default function Header({
   onReconnect,
 }) {
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-backdrop px-4 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
-          className="p-2 rounded-lg hover:bg-surface text-text-secondary"
+          className="p-2 rounded-lg hover:bg-surface text-text-secondary transition-colors"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <ChevronLeft className={`w-5 h-5 ${collapsed ? "rotate-180" : ""}`} />
         </button>
@@ -25,31 +26,44 @@ export default function Header({
             className="bg-card border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-purple/50 cursor-pointer"
           >
             <option value="gemini/gemini-3.5-flash">Gemini 3.5 Flash (Recommended)</option>
-            <option value="gemini/gemini-3.8-flash">Gemini 3.8 Flash</option>
+            <option value="gemini/gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (Fast Fallback)</option>
+            <option value="gemini/gemini-3.8-flash">Gemini 3.8 Flash (Latest)</option>
             <option value="gemini/gemini-pro-latest">Gemini Pro</option>
           </select>
-          <button onClick={onSettingsClick} className="ml-2 p-2 rounded-lg hover:bg-surface text-text-secondary">
+          <button
+            onClick={onSettingsClick}
+            className="p-2 rounded-lg hover:bg-surface text-text-secondary hover:text-text-primary transition-colors"
+            title="System Settings"
+          >
             <Settings className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface border border-border">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface border border-border">
           <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              connectionStatus === "connected" ? "bg-green-500" : "bg-red-500"
-            } animate-pulse`}
+            className={`w-2 h-2 rounded-full ${
+              connectionStatus === "connected"
+                ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"
+                : connectionStatus === "checking"
+                ? "bg-amber-400 animate-pulse"
+                : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"
+            }`}
           />
-          <span className="text-[10px] uppercase tracking-wider text-text-secondary">
-            {connectionStatus === "connected" ? "Connected" : "Disconnected"}
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+            {connectionStatus === "connected"
+              ? "Connected"
+              : connectionStatus === "checking"
+              ? "Checking..."
+              : "Disconnected"}
           </span>
         </div>
         {connectionStatus !== "connected" && (
           <button
             onClick={onReconnect}
-            className="p-2 rounded-lg hover:bg-surface text-text-secondary"
-            title="Reconnect"
+            className="p-1.5 rounded-lg hover:bg-surface text-text-secondary hover:text-red-400 transition-colors"
+            title="Retry backend connection"
           >
             <AlertCircle className="w-4 h-4 text-red-500" />
           </button>

@@ -132,7 +132,7 @@ class LLMService:
 
         chosen_model = model or self.default_model
         models_to_try = [chosen_model]
-        if not simulation and chosen_model == "gemini/gemini-3.5-flash":
+        if not simulation and chosen_model != "gemini/gemini-3.5-flash-lite":
             models_to_try.append("gemini/gemini-3.5-flash-lite")
 
         for cur_model in models_to_try:
