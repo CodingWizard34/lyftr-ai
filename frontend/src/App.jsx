@@ -47,6 +47,12 @@ export default function App() {
     setWelcomeScreen(true);
     setError(null);
     checkBackendHealth();
+
+    // Auto-poll health every 15s to automatically recover when backend wakes up from sleep
+    const timer = setInterval(() => {
+      checkBackendHealth();
+    }, 15000);
+    return () => clearInterval(timer);
   }, [checkBackendHealth]);
 
   useEffect(() => {
@@ -97,6 +103,7 @@ export default function App() {
         headers
       );
 
+      setConnectionStatus("connected");
       setMessages((prev) => [
         ...prev,
         {

@@ -130,24 +130,30 @@ class LLMService:
         fallback_attempts = 0
         last_status = None
 
-        for key, key_id in zip(self.keys, self.key_ids):
-            if is_key_simulated_failure(key_id, simulation):
+        chosen_model = model or self.default_model
+        models_to_try = [chosen_model]
+        if not simulation and chosen_model == "gemini/gemini-3.5-flash":
+            models_to_try.append("gemini/gemini-3.5-flash-lite")
+
+        for cur_model in models_to_try:
+            for key, key_id in zip(self.keys, self.key_ids):
+                if is_key_simulated_failure(key_id, simulation):
+                    fallback_attempts += 1
+                    last_status = simulated_status_code(key_id, simulation) or 500
+                    continue
+
+                success, reply, metadata, status_code = self._call_single_key(
+                    key, key_id, messages, simulation, model=cur_model
+                )
+                if success:
+                    if metadata.get("resolution_source") == "LLM_CACHE":
+                        metadata["fallback_attempts"] = 0
+                        metadata["key_id"] = None
+                    else:
+                        metadata["fallback_attempts"] = fallback_attempts
+                    return reply, metadata
+
                 fallback_attempts += 1
-                last_status = simulated_status_code(key_id, simulation) or 500
-                continue
-
-            success, reply, metadata, status_code = self._call_single_key(
-                key, key_id, messages, simulation, model=model
-            )
-            if success:
-                if metadata.get("resolution_source") == "LLM_CACHE":
-                    metadata["fallback_attempts"] = 0
-                    metadata["key_id"] = None
-                else:
-                    metadata["fallback_attempts"] = fallback_attempts
-                return reply, metadata
-
-            fallback_attempts += 1
-            last_status = status_code or 500
+                last_status = status_code or 500
 
         raise RuntimeError(f"all providers unavailable (last status: {last_status})")
