@@ -1,22 +1,28 @@
-import { Send, ChevronRight } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function MessageBubble({ role, content, metadata }) {
   const isUser = role === "user";
 
-  const userClassName =
-    "bg-purple/20 text-text-primary border border-purple/30 rounded-tr-sm rounded-tl-xl rounded-br-xl";
-  const assistantClassName =
-    "bg-surface text-text-primary border border-rounded rounded-tl-sm rounded-tr-xl rounded-bl-xl";
-
   return (
-    <div className="flex w-full mb-6">
+    <div className={`flex w-full mb-4 ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={
-          isUser ? userClassName : assistantClassName
-        }
-        data-testid="assistant-message"
+        className={`max-w-[85%] md:max-w-[75%] p-4 text-sm leading-relaxed transition-all shadow-md ${
+          isUser
+            ? "bg-purple/20 text-text-primary border border-purple/40 rounded-2xl rounded-tr-sm text-right"
+            : "bg-surface text-text-primary border border-border/80 rounded-2xl rounded-tl-sm text-left"
+        }`}
+        data-testid={isUser ? "user-message" : "assistant-message"}
       >
-        {content}
+        {isUser ? (
+          <div className="whitespace-pre-wrap">{content}</div>
+        ) : (
+          <div className="prose prose-invert max-w-none text-text-primary text-sm space-y-2">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {content}
+            </ReactMarkdown>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -24,34 +30,40 @@ export default function MessageBubble({ role, content, metadata }) {
 
 export function ResponseMetadata({ metadata }) {
   if (!metadata) return null;
-  const source = metadata.resolution_source === "LLM_CACHE" ? "LLM_CACHE" : "LIVE_INFERENCE";
+  const isCache = metadata.resolution_source === "LLM_CACHE";
+  const source = isCache ? "LLM_CACHE" : "LIVE_INFERENCE";
   const keyId = metadata.key_id ? metadata.key_id : "-";
 
   return (
-    <div className="flex items-center justify-between mt-2 px-5 py-2 bg-surface/50 rounded-lg border border-border/50 text-[10px] uppercase tracking-wider text-text-secondary">
-      <div className="flex items-center gap-1">
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full" />
-          <span className="data-testid meta-source">{source}</span>
+    <div className="flex flex-wrap items-center justify-between gap-2 mt-1 mb-4 px-4 py-2 bg-surface/60 rounded-lg border border-border/60 text-[10px] uppercase tracking-wider text-text-secondary max-w-[85%] md:max-w-[75%]">
+      <div className="flex items-center gap-1.5">
+        <span
+          className={`w-2 h-2 rounded-full ${
+            isCache ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
+          }`}
+        />
+        <span className={`font-semibold ${isCache ? "text-amber-400" : "text-emerald-400"} data-testid meta-source`}>
+          {source}
         </span>
       </div>
-      <div className="flex items-center gap-4 text-text-secondary">
-        <div className="flex items-center gap-2 text-text-secondary">
-          <span className="data-testid meta-model">{metadata.model}</span>
-          <span>·</span>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-1">
+          <span className="data-testid meta-model text-text-primary font-medium">{metadata.model}</span>
         </div>
-        <div className="flex items-center gap-2 text-text-secondary">
-          <span className="data-testid meta-latency">{metadata.latency_ms} ms</span>
+        <span>·</span>
+        <div>
+          <span className="data-testid meta-latency font-medium">{metadata.latency_ms} ms</span>
         </div>
-        <div className="flex items-center gap-2 text-text-secondary">
-          <span className="data-testid meta-input-tokens">{metadata.input_tokens} tokens</span>
+        <span>·</span>
+        <div>
+          <span className="data-testid meta-input-tokens">{metadata.input_tokens} in</span>
+          <span className="mx-1">/</span>
+          <span className="data-testid meta-output-tokens">{metadata.output_tokens} out</span>
         </div>
-        <div className="flex items-center gap-2 text-text-secondary">
-          <span className="data-testid meta-output-tokens">{metadata.output_tokens} tokens</span>
+        <span>·</span>
+        <div>
+          <span>Key: <strong className="text-purple">{keyId}</strong></span>
         </div>
-      </div>
-      <div className="flex items-center gap-2 text-text-secondary">
-        <span>Key: {keyId}</span>
       </div>
     </div>
   );

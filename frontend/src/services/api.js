@@ -11,7 +11,7 @@ const api = axios.create({
 
 export const health = () => api.get("/health");
 
-export const chat = (data) => api.post("/chat", data);
+export const chat = (data, headers = {}) => api.post("/chat", data, { headers });
 
 export const getMessages = (session_id) =>
   api.get(`/sessions/${encodeURIComponent(session_id)}/messages`);

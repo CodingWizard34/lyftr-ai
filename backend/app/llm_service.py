@@ -73,6 +73,9 @@ class LLMService:
                 caching=CACHE_ENABLED,
             )
         except Exception as exc:
+            import traceback
+            print(f"[LLM ERROR] Key {key_id} failed: {type(exc).__name__}: {exc}", flush=True)
+            traceback.print_exc()
             status_code = getattr(exc, "status_code", None) or 500
             return False, None, None, status_code
 
