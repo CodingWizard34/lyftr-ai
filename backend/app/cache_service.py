@@ -33,3 +33,23 @@ def cache_key_for_messages(model: str, messages: List[Dict[str, str]]) -> str:
 
 def is_cache_enabled() -> bool:
     return CACHE_ENABLED and litellm.cache is not None
+
+
+_LOCAL_RESPONSE_CACHE: Dict[str, Tuple[str, Dict[str, Any]]] = {}
+
+
+def get_cached_response(model: str, messages: List[Dict[str, str]]) -> Optional[Tuple[str, Dict[str, Any]]]:
+    """Check deterministic cache for an exact match on (model, messages)."""
+    if not CACHE_ENABLED:
+        return None
+    key = cache_key_for_messages(model, messages)
+    return _LOCAL_RESPONSE_CACHE.get(key)
+
+
+def set_cached_response(model: str, messages: List[Dict[str, str]], reply: str, metadata: Dict[str, Any]) -> None:
+    """Store response in cache."""
+    if not CACHE_ENABLED:
+        return
+    key = cache_key_for_messages(model, messages)
+    _LOCAL_RESPONSE_CACHE[key] = (reply, dict(metadata))
+

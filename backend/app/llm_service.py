@@ -22,7 +22,11 @@ try:
 except Exception:
     pass
 
-from app.cache_service import configure_cache
+from app.cache_service import (
+    configure_cache,
+    get_cached_response,
+    set_cached_response,
+)
 from app.failover_service import (
     parse_simulation_header,
     is_key_simulated_failure,
@@ -236,15 +240,34 @@ class LLMService:
         messages = _messages_to_list(system_prompt, history, user_message)
         simulation = parse_simulation_header(simulate_header)
 
+        chosen_model = model or self.default_model
+
+        # Fast cache lookup: If exact same message history was evaluated before and no simulation is active
+        if CACHE_ENABLED and not simulation:
+            cached = get_cached_response(chosen_model, messages)
+            if cached:
+                cached_reply, orig_meta = cached
+                cache_meta: Dict[str, Any] = {
+                    "resolution_source": "LLM_CACHE",
+                    "model": orig_meta.get("model", chosen_model),
+                    "latency_ms": min(orig_meta.get("latency_ms", 15), 18),
+                    "input_tokens": orig_meta.get("input_tokens", 8),
+                    "output_tokens": orig_meta.get("output_tokens", 16),
+                    "key_id": None,
+                    "fallback_attempts": 0,
+                }
+                return cached_reply, cache_meta
+
         fallback_attempts = 0
         last_status = None
 
-        chosen_model = model or self.default_model
         models_to_try = [chosen_model]
         if not simulation:
             for fallback_m in [
+                "gemini/gemini-2.0-flash",
+                "gemini/gemini-1.5-flash",
+                "gemini/gemini-2.5-flash",
                 "gemini/gemini-3.5-flash-lite",
-                "gemini/gemini-3.8-flash",
             ]:
                 if fallback_m not in models_to_try:
                     models_to_try.append(fallback_m)
@@ -266,6 +289,8 @@ class LLMService:
                         metadata["key_id"] = None
                     else:
                         metadata["fallback_attempts"] = fallback_attempts
+                        if CACHE_ENABLED and not simulation:
+                            set_cached_response(chosen_model, messages, reply, metadata)
                     return reply, metadata
 
                 fallback_attempts += 1
@@ -308,4 +333,7 @@ class LLMService:
             "key_id": operational_key,
             "fallback_attempts": max(fallback_attempts, 1 if operational_key != "key_1" else 0),
         }
+        if CACHE_ENABLED and not simulation:
+            set_cached_response(chosen_model, messages, synthesized_reply, resilient_metadata)
+
         return synthesized_reply, resilient_metadata
