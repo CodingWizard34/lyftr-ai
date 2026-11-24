@@ -22,13 +22,11 @@ export default function Header({
           <select
             value={model}
             onChange={(e) => onModelChange(e.target.value)}
-            className="bg-card border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-purple/50"
+            className="bg-card border border-border rounded-lg px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-purple/50 cursor-pointer"
           >
-            {["gemini/gemini-2.0-flash", "gemini/gemini-1.5-flash", "claude-3-haiku"].map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
+            <option value="gemini/gemini-2.0-flash">Gemini 2.0 Flash (Recommended)</option>
+            <option value="gemini/gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <option value="gemini/gemini-1.5-pro">Gemini 1.5 Pro</option>
           </select>
           <button onClick={onSettingsClick} className="ml-2 p-2 rounded-lg hover:bg-surface text-text-secondary">
             <Settings className="w-4 h-4" />

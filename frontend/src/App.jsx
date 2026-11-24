@@ -118,7 +118,7 @@ export default function App() {
   }, [handleSend]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-main">
+    <div className="flex h-screen w-screen overflow-hidden bg-main">
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((c) => !c)}
@@ -142,32 +142,36 @@ export default function App() {
           onReconnect={checkBackendHealth}
         />
 
-        <main className="flex-1 flex flex-col overflow-hidden relative">
-          <div className="flex-1 overflow-y-auto" ref={scrollRef}>
-            {welcomeScreen && messages.length === 0 ? (
-              <WelcomeScreen onPromptSelect={handlePromptSelect} />
-            ) : (
-              <ChatWindow messages={messages} isLoading={loading} />
-            )}
+        <main className="flex-1 flex flex-col overflow-hidden relative w-full">
+          <div className="flex-1 overflow-y-auto w-full" ref={scrollRef}>
+            <div className="max-w-4xl mx-auto w-full px-4 py-6">
+              {welcomeScreen && messages.length === 0 ? (
+                <WelcomeScreen onPromptSelect={handlePromptSelect} />
+              ) : (
+                <ChatWindow messages={messages} isLoading={loading} />
+              )}
+            </div>
 
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 text-center mx-6 my-4 flex items-center justify-center gap-2">
+              <div className="max-w-xl mx-auto p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 text-center mx-6 my-4 flex items-center justify-center gap-2">
                 <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
           </div>
 
-          <div className="border-t border-border bg-surface/50 backdrop-blur z-10">
-            <MessageComposer
-              value={inputValue}
-              onChange={setInputValue}
-              onSend={() => handleSend()}
-              disabled={loading}
-              systemPrompt={systemPrompt}
-              onSystemPromptChange={setSystemPrompt}
-              isLoading={loading}
-            />
+          <div className="border-t border-border bg-surface/50 backdrop-blur z-10 w-full">
+            <div className="max-w-4xl mx-auto w-full">
+              <MessageComposer
+                value={inputValue}
+                onChange={setInputValue}
+                onSend={() => handleSend()}
+                disabled={loading}
+                systemPrompt={systemPrompt}
+                onSystemPromptChange={setSystemPrompt}
+                isLoading={loading}
+              />
+            </div>
           </div>
         </main>
       </div>
