@@ -61,6 +61,11 @@ def health():
     )
 
 
+@app.get("/version")
+def version():
+    return {"version": "1.0.2", "commit": "20e7e9a"}
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(
     request: ChatRequest,
