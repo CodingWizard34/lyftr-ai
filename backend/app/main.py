@@ -52,6 +52,21 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(status_code=422, content={"detail": "Invalid input"})
 
 
+@app.get("/")
+def root():
+    return {
+        "service": "Lyftr AI Backend",
+        "status": "running",
+        "health": "/health",
+        "frontend": "https://lyftr-ai-mocha.vercel.app",
+        "endpoints": [
+            "GET /health",
+            "POST /chat",
+            "GET /sessions/{session_id}/messages",
+        ],
+    }
+
+
 @app.get("/health", response_model=HealthResponse)
 def health():
     return HealthResponse(
